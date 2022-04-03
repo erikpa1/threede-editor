@@ -1,5 +1,13 @@
+mod threedeapp;
+
+
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext, EguiPlugin};
+
+//Resources
+//https://github.com/mvlabat/bevy_egui
+//https://www.egui.rs/#demo
+//https://github.com/emilk/egui#goals
 
 #[derive(Default)]
 struct OccupiedScreenSpace {
@@ -14,59 +22,17 @@ const CAMERA_TARGET: Vec3 = Vec3::ZERO;
 struct OriginalCameraTransform(Transform);
 
 fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
+    let mut tmpApp = App::new();
+
+    tmpApp.add_plugins(DefaultPlugins)
         .add_plugin(EguiPlugin)
         .init_resource::<OccupiedScreenSpace>()
-        .add_startup_system(setup_system)
-        .add_system(ui_example_system)
-        .add_system(update_camera_transform_system)
-        .run();
+        .add_startup_system(setup_system);
+    threedeapp::bevy_init(&mut tmpApp);
+
+    tmpApp.run();
 }
 
-fn ui_example_system(
-    mut egui_context: ResMut<EguiContext>,
-    mut occupied_screen_space: ResMut<OccupiedScreenSpace>,
-) {
-    occupied_screen_space.left = egui::SidePanel::left("left_panel")
-        .resizable(true)
-        .show(egui_context.ctx_mut(), |ui| {
-            ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
-        })
-        .response
-        .rect
-        .width();
-    occupied_screen_space.right = egui::SidePanel::right("right_panel")
-        .resizable(true)
-        .show(egui_context.ctx_mut(), |ui| {
-            ui.heading("Side Panel");
-
-            ui.horizontal(|ui| {
-                ui.label("Write something: ");
-            });
-
-            ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
-        })
-        .response
-        .rect
-        .width();
-    occupied_screen_space.top = egui::TopBottomPanel::top("top_panel")
-        .resizable(true)
-        .show(egui_context.ctx_mut(), |ui| {
-            ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
-        })
-        .response
-        .rect
-        .height();
-    occupied_screen_space.bottom = egui::TopBottomPanel::bottom("bottom_panel")
-        .resizable(true)
-        .show(egui_context.ctx_mut(), |ui| {
-            ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
-        })
-        .response
-        .rect
-        .height();
-}
 
 fn setup_system(
     mut commands: Commands,
